@@ -1,0 +1,46 @@
+name: Create Service from newly created branch
+
+on:
+    create:
+        branches:
+            - '*'
+
+jobs:
+  
+  create_service:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'delete'
+    env: 
+      CREATED_BRANCH: false 
+    steps:
+        - name: Run on branch creation
+          id: branch_creation
+          run: |
+            echo "CREATED_BRANCH=true" >> $GITHUB_ENV
+            echo "Branch created. Running specific steps for branch creation."
+            echo "blah blah"
+
+        - name: Get Event JSON
+          run: |
+            echo $CREATED_BRANCH
+
+            echo ${{ steps.branch_creation.outputs.CREATED_BRANCH}}
+            echo "${{ toJson(github.event) }}" > event.json
+      
+        - name: Extract Created Branch Name
+          if: env.CREATED_BRANCH == 'true'
+          id: extract_branch
+          run: |
+            created_branch_name=$(sed -n 's/.*ref: \(.*\),/\1/p' event.json)
+            echo "Created branch name: $created_branch_name"
+            echo "created_branch_name=$created_branch_name" >> $GITHUB_ENV
+  
+        - name: Use Created Branch Name
+          if: env.CREATED_BRANCH == 'true'
+          run: |
+            echo "Created branch name: $created_branch_name"
+  
+        - name: Use Created Branch Name
+          if: env.CREATED_BRANCH == 'true'
+          run: |
+            echo "Created branch name from environment: $created_branch_name"
